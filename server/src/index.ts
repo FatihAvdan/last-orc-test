@@ -3,8 +3,13 @@ import cors from 'cors';
 import { config } from './config';
 import { pool } from './db';
 import { UserModel } from './models/User';
+import { ThemeModel } from './models/Theme';
+import { PortfolioModel } from './models/Portfolio';
+import { ProjectShowcaseModel } from './models/ProjectShowcase';
+import { CVSectionModel } from './models/CVSection';
 import { authRouter } from './routes/auth';
 import { healthRouter } from './routes/health';
+import { portfolioRouter } from './routes/portfolios';
 import { errorHandler } from './middleware/errorHandler';
 
 async function main() {
@@ -15,11 +20,17 @@ async function main() {
 
   app.use('/health', healthRouter);
   app.use('/auth', authRouter);
+  app.use('/api/portfolios', portfolioRouter);
 
   app.use(errorHandler);
 
   try {
     await UserModel.createTable();
+    await ThemeModel.createTable();
+    await ThemeModel.seed();
+    await PortfolioModel.createTable();
+    await ProjectShowcaseModel.createTable();
+    await CVSectionModel.createTable();
     console.log('Database tables initialized');
   } catch (err) {
     console.error('Failed to initialize database tables:', err);
