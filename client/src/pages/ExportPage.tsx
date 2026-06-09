@@ -1,16 +1,42 @@
 import React, { useState } from 'react';
 import { SEOHead } from '../components/SEOHead';
-import type { ExportFormat, ExportRequest } from '@devfolio/shared';
+import type { ExportFormat, ExportRequest, ExportResponse } from '@devfolio/shared';
 
 export function ExportPage(): React.ReactElement {
   const [portfolioId, setPortfolioId] = useState(1);
   const [format, setFormat] = useState<ExportFormat>('html');
   const [exportUrl, setExportUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleExport = (): void => {
-    const request: ExportRequest = { portfolioId, format };
-    console.log('Exporting:', request);
-    setExportUrl(`/api/export?portfolioId=${portfolioId}&format=${format}`);
+  const handleExport = async (): Promise<void> => {
+    setError('');
+    setExportUrl('');
+    setLoading(true);
+
+    try {
+      const request: ExportRequest = { portfolioId, format };
+
+      const response = await fetch('/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        const err = await response.json() as { error: string };
+        setError(err.error || 'Export failed');
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json() as ExportResponse;
+      setExportUrl(data.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Export failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,10 +88,17 @@ export function ExportPage(): React.ReactElement {
         <button
           type="button"
           onClick={handleExport}
-          style={{ width: '100%', padding: '0.75rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer' }}
+          disabled={loading}
+          style={{ width: '100%', padding: '0.75rem', background: loading ? '#93c5fd' : '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer' }}
         >
-          Export {format.toUpperCase()}
+          {loading ? 'Generating...' : `Export ${format.toUpperCase()}`}
         </button>
+
+        {error && (
+          <div style={{ marginTop: '1rem', padding: '1rem', background: '#fef2f2', borderRadius: '4px', color: '#dc2626' }}>
+            {error}
+          </div>
+        )}
 
         {exportUrl && (
           <div style={{ marginTop: '1rem', padding: '1rem', background: '#ecfdf5', borderRadius: '4px', color: '#065f46' }}>

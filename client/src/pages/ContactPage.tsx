@@ -11,13 +11,14 @@ export function ContactPage(): React.ReactElement {
   });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-    const target = e.target as HTMLInputElement;
-    setFormData({ ...formData, [target.name]: target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent): void => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setError('');
 
@@ -26,8 +27,33 @@ export function ContactPage(): React.ReactElement {
       return;
     }
 
-    console.log('Submitting contact form:', formData);
-    setSubmitted(true);
+    setLoading(true);
+
+    try {
+      const response = await fetch('/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const err = await response.json() as { error: string };
+        setError(err.error || 'Failed to send message');
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json() as ContactResponse;
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        setError('Failed to send message');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send message');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -109,9 +135,10 @@ export function ContactPage(): React.ReactElement {
 
         <button
           type="submit"
-          style={{ width: '100%', padding: '0.75rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer' }}
+          disabled={loading}
+          style={{ width: '100%', padding: '0.75rem', background: loading ? '#93c5fd' : '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer' }}
         >
-          Send Message
+          {loading ? 'Sending...' : 'Send Message'}
         </button>
       </form>
     </div>

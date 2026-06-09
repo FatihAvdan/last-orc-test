@@ -49,6 +49,12 @@ blogRouter.get(
         res.status(404).json({ error: 'Blog post not found', statusCode: 404 });
         return;
       }
+
+      await pool.query(
+        'UPDATE blog_posts SET views = views + 1 WHERE slug = $1',
+        [slug],
+      );
+      result.rows[0].views += 1;
       res.json(result.rows[0]);
     } catch (err) {
       next(err);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { BlogPage } from './pages/BlogPage';
+import { BlogPostPage } from './pages/BlogPostPage';
 import { BlogEditorPage } from './pages/BlogEditorPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { PublicProfilePage } from './pages/PublicProfilePage';
@@ -30,6 +31,7 @@ export function App(): React.ReactElement {
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/new" element={<BlogEditorPage />} />
           <Route path="/blog/:slug/edit" element={<BlogEditorPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/p/:slug" element={<PublicProfilePage />} />
           <Route path="/contact" element={<ContactPage />} />

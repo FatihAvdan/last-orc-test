@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { marked } from 'marked';
 
 interface BlogEditorProps {
   initialContent?: string;
@@ -16,6 +17,8 @@ export function BlogEditor({ initialContent, initialTitle, initialExcerpt, initi
   const [tagInput, setTagInput] = useState('');
   const [isPublished, setIsPublished] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+
+  const previewHtml = useMemo(() => marked.parse(contentMd) as string, [contentMd]);
 
   const handleAddTag = (): void => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -83,7 +86,7 @@ export function BlogEditor({ initialContent, initialTitle, initialExcerpt, initi
       {previewMode ? (
         <div
           style={{ minHeight: '400px', padding: '1rem', border: '1px solid #ddd', borderRadius: '4px', background: '#fff' }}
-          dangerouslySetInnerHTML={{ __html: contentMd }}
+          dangerouslySetInnerHTML={{ __html: previewHtml }}
         />
       ) : (
         <textarea
