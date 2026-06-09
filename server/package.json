@@ -17,6 +17,7 @@
     "express": "^4.19.0",
     "ioredis": "^5.4.0",
     "jsonwebtoken": "^9.0.2",
+    "marked": "^12.0.0",
     "pg": "^8.12.0"
   },
   "devDependencies": {
