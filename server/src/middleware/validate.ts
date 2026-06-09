@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { validationResult, ValidationChain } from 'express-validator';
+import { validationResult, ValidationChain, FieldValidationError } from 'express-validator';
 
 export function validate(validations: ValidationChain[]) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -7,12 +7,12 @@ export function validate(validations: ValidationChain[]) {
       await validation.run(req);
     }
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    const errors = validationResult(req).array() as FieldValidationError[];
+    if (errors.length > 0) {
       res.status(400).json({
         error: 'validation failed',
         statusCode: 400,
-        details: errors.array().map((e) => ({ field: (e as { path: string }).path, message: e.msg })),
+        details: errors.map((e) => ({ field: e.path, message: e.msg })),
       });
       return;
     }
