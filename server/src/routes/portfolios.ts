@@ -1,5 +1,5 @@
 import { Router, Response, NextFunction } from 'express';
-import { body, param, query } from 'express-validator';
+import { body, param } from 'express-validator';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { PortfolioModel } from '../models/Portfolio';

@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
+    "shared",
     "server",
-    "client",
-    "shared"
+    "client"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=server",
-    "build": "npm run build --workspaces",
-    "typecheck": "npm run typecheck --workspaces",
-    "lint": "eslint . --ext .ts",
+    "build": "npm run build --workspace=shared && npm run build --workspace=server && npm run build --workspace=client",
+    "typecheck": "npm run build --workspace=shared && npm run typecheck --workspaces",
+    "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write ."
   },
   "devDependencies": {
