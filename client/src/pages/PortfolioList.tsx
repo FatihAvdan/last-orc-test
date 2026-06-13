@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { api, type Portfolio } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Pencil, Trash2, ExternalLink } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Globe } from 'lucide-react';
 
 export function PortfolioListPage() {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
@@ -14,7 +14,7 @@ export function PortfolioListPage() {
     try {
       setLoading(true);
       const data = await api.getPortfolios();
-      setPortfolios(data);
+      setPortfolios(data.portfolios);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load portfolios');
     } finally {
@@ -76,40 +76,31 @@ export function PortfolioListPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {portfolios.map((portfolio) => (
             <Card key={portfolio.id}>
-              {portfolio.imageUrl && (
-                <img
-                  src={portfolio.imageUrl}
-                  alt={portfolio.title}
-                  className="h-48 w-full rounded-t-lg object-cover"
-                />
-              )}
               <CardHeader>
                 <CardTitle className="text-lg">{portfolio.title}</CardTitle>
-                <CardDescription className="line-clamp-2">{portfolio.description}</CardDescription>
+                <CardDescription className="line-clamp-2">{portfolio.slug}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-1 mb-3">
-                  {portfolio.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
-                    >
-                      {tag}
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+                    {portfolio.theme?.preset ?? 'minimal'}
+                  </span>
+                  {portfolio.is_published && (
+                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700 dark:bg-green-900 dark:text-green-300">
+                      Published
                     </span>
-                  ))}
+                  )}
+                  {!portfolio.is_published && (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                      Draft
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
-                  {portfolio.url && (
-                    <a
-                      href={portfolio.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      Visit
-                    </a>
-                  )}
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Globe className="h-3 w-3" />
+                    /{portfolio.slug}
+                  </span>
                   <div className="ml-auto flex gap-1">
                     <Button variant="ghost" size="icon" asChild>
                       <Link to={`/portfolios/${portfolio.id}/edit`}>

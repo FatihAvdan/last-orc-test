@@ -18,8 +18,8 @@ async function main() {
   app.use(cors());
   app.use(express.json());
 
-  app.use('/health', healthRouter);
-  app.use('/auth', authRouter);
+  app.use('/api/health', healthRouter);
+  app.use('/api/auth', authRouter);
   app.use('/api/portfolios', portfolioRouter);
 
   app.use(errorHandler);

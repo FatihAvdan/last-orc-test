@@ -11,10 +11,8 @@ export function PortfolioEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [url, setUrl] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [tagsInput, setTagsInput] = useState('');
+  const [slug, setSlug] = useState('');
+  const [isPublished, setIsPublished] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -22,12 +20,11 @@ export function PortfolioEditPage() {
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {
-        const data: Portfolio = await api.getPortfolio(Number(id));
-        setTitle(data.title);
-        setDescription(data.description);
-        setUrl(data.url);
-        setImageUrl(data.imageUrl || '');
-        setTagsInput(data.tags.join(', '));
+        const data = await api.getPortfolio(Number(id));
+        const portfolio: Portfolio = data.portfolio;
+        setTitle(portfolio.title);
+        setSlug(portfolio.slug);
+        setIsPublished(portfolio.is_published);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load portfolio');
       } finally {
@@ -42,16 +39,10 @@ export function PortfolioEditPage() {
     setError('');
     setLoading(true);
     try {
-      const tags = tagsInput
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean);
       await api.updatePortfolio(Number(id), {
         title,
-        description,
-        url,
-        imageUrl: imageUrl || undefined,
-        tags,
+        slug,
+        is_published: isPublished,
       });
       navigate('/portfolios');
     } catch (err) {
@@ -103,39 +94,26 @@ export function PortfolioEditPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
+              <Label htmlFor="slug">Slug *</Label>
               <Input
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                id="slug"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Used in the URL: /{slug || 'my-portfolio'}
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="url">URL</Label>
-              <Input
-                id="url"
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="isPublished"
+                checked={isPublished}
+                onChange={(e) => setIsPublished(e.target.checked)}
+                className="h-4 w-4 rounded border-input"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="imageUrl">Image URL</Label>
-              <Input
-                id="imageUrl"
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags (comma-separated)</Label>
-              <Input
-                id="tags"
-                value={tagsInput}
-                onChange={(e) => setTagsInput(e.target.value)}
-              />
+              <Label htmlFor="isPublished">Published</Label>
             </div>
           </CardContent>
           <CardContent>

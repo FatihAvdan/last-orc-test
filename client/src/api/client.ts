@@ -1,4 +1,13 @@
-import type { AuthResponse, RegisterRequest, LoginRequest } from '@devfolio/shared';
+import type {
+  AuthResponse,
+  RegisterRequest,
+  LoginRequest,
+  Portfolio,
+  PortfolioListResponse,
+  PortfolioDetailResponse,
+  PortfolioCreateRequest,
+  PortfolioUpdateRequest,
+} from '@devfolio/shared';
 
 const API_BASE = '/api';
 
@@ -23,6 +32,10 @@ class ApiClient {
       headers,
     });
 
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
     const data = await response.json();
 
     if (!response.ok) {
@@ -46,23 +59,23 @@ class ApiClient {
     });
   }
 
-  async getPortfolios(): Promise<Portfolio[]> {
-    return this.request<Portfolio[]>('/portfolios');
+  async getPortfolios(): Promise<PortfolioListResponse> {
+    return this.request<PortfolioListResponse>('/portfolios');
   }
 
-  async getPortfolio(id: number): Promise<Portfolio> {
-    return this.request<Portfolio>(`/portfolios/${id}`);
+  async getPortfolio(id: number): Promise<PortfolioDetailResponse> {
+    return this.request<PortfolioDetailResponse>(`/portfolios/${id}`);
   }
 
-  async createPortfolio(data: CreatePortfolioRequest): Promise<Portfolio> {
-    return this.request<Portfolio>('/portfolios', {
+  async createPortfolio(data: PortfolioCreateRequest): Promise<PortfolioDetailResponse> {
+    return this.request<PortfolioDetailResponse>('/portfolios', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async updatePortfolio(id: number, data: UpdatePortfolioRequest): Promise<Portfolio> {
-    return this.request<Portfolio>(`/portfolios/${id}`, {
+  async updatePortfolio(id: number, data: PortfolioUpdateRequest): Promise<PortfolioDetailResponse> {
+    return this.request<PortfolioDetailResponse>(`/portfolios/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -81,27 +94,11 @@ class ApiClient {
   setToken(token: string): void {
     localStorage.setItem('token', token);
   }
+
+  get isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
 }
 
-export interface Portfolio {
-  id: number;
-  title: string;
-  description: string;
-  url: string;
-  imageUrl?: string;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreatePortfolioRequest {
-  title: string;
-  description: string;
-  url: string;
-  imageUrl?: string;
-  tags: string[];
-}
-
-export type UpdatePortfolioRequest = Partial<CreatePortfolioRequest>;
-
+export { type Portfolio };
 export const api = new ApiClient();
