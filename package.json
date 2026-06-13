@@ -11,6 +11,7 @@
     "dev": "npm run dev --workspace=server",
     "build": "npm run build --workspace=shared && npm run build --workspace=server && npm run build --workspace=client",
     "typecheck": "npm run build --workspace=shared && npm run typecheck --workspaces",
+    "test": "npm run test --workspaces",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write ."
   },

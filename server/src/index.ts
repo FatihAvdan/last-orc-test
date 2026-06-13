@@ -12,7 +12,7 @@ import { healthRouter } from './routes/health';
 import { portfolioRouter } from './routes/portfolios';
 import { errorHandler } from './middleware/errorHandler';
 
-async function main() {
+export function createApp() {
   const app = express();
 
   app.use(cors());
@@ -23,6 +23,12 @@ async function main() {
   app.use('/api/portfolios', portfolioRouter);
 
   app.use(errorHandler);
+
+  return app;
+}
+
+async function main() {
+  const app = createApp();
 
   try {
     await UserModel.createTable();
@@ -47,7 +53,11 @@ async function main() {
   });
 }
 
-main().catch((err) => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
-});
+const isEntryPoint = !process.env.VITEST && (process.argv[1]?.endsWith('index.ts') || process.argv[1]?.endsWith('index.js'));
+
+if (isEntryPoint) {
+  main().catch((err) => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  });
+}
